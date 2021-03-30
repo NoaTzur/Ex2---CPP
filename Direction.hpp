@@ -7,4 +7,3 @@ namespace ariel {
 		Vertical	
 	};
 }
-

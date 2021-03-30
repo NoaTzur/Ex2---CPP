@@ -4,24 +4,30 @@
 #include <math.h>    
 #include <iostream> 
 #include <cctype>
+#include <string>
+
 
 
 namespace ariel {
     
+    Board::Board(){
+        this->vect.resize(ROW, std::vector<char>(COL));
 
-    void Board::post(unsigned int  row, unsigned int  column, Direction direction, std::string message) {
-
-        //checks if the row or col is out of bounds (should be > 0)
-        /*
-        if (row < 0 || column < 0){
-            throw std::out_of_range ("out of range, row and col should be greater then zero");
+        for (u_int i = 0; i < this->vect.size(); i++){
+            for (u_int j = 0; j < this->vect.at(0).size(); j++){
+                this->vect.at(i).at(j) = '_';
+            }
         }
+    }
 
-        //resize if the range we have recieved is greater then the current range of the 2d vector
-        if (this->vect.size()-row < message.size() || this->vect.at(0).size()-column < message.size())
+    void Board::post(u_int row, u_int column, Direction direction, const std::string &message) {
+
+
+        if (this->vect.size() < row || this->vect.at(0).size()< column)
         {
             Board::resizeVect(row, column, message);
         }
+      
         
         if(direction == Direction::Vertical){
 
@@ -33,49 +39,29 @@ namespace ariel {
 
         } 
 
-        //update the new area (range) of strings in the borad
-        if(row < this->low_limit_row){
-            this->low_limit_row = row;
-        }
-        else if (row+message.size() > this->high_limit_row){
-            this->high_limit_row = row+message.size();
-        }
-
-        if (column < this->low_limit_col)
-        {
-            this->low_limit_col = column;
-        }
-        else if (column+message.size() > this->high_limit_col)
-        {
-            this->high_limit_col = column+message.size();
-        }
-        */
           
     }
-    void Board::resizeVect(unsigned int row, unsigned int column, std::string message){
+    void Board::resizeVect(u_int row, u_int column, const std::string &message){
 
-        unsigned int prevRow = this->vect.size();
-        unsigned int prevCol = this->vect.at(0).size();
-
-        unsigned int newRow = prevRow+(message.size()*2);
-        unsigned int newCol = prevCol+(message.size()*2);
-/*
-        this->vect.resize(newRow);//, std::vector<char>(COL));
-        for (size_t i = 0; i < newRow; i++)
+        u_int prevRow = this->vect.size();
+        u_int prevCol = this->vect.at(0).size();
+        if (row < column)
         {
-            this->vect.at(i).resize(newCol);
+            row = column;
         }
-
-
-        // for (size_t i = prevRow; i < newRow ; i++){
-        //     for (size_t j = prevCol; j < newCol; j++){
-        //         this->vect.at(i).at(j) = '_';
-        //     }
-        // }
-        */
+   
+        u_int newSize = row+(message.size()*4);
+       
+        this->vect.resize(newSize);
+        for (u_int i = 0; i < newSize; i++)
+        {
+            this->vect.at(i).resize(newSize);
+        }
+       
+              
     }
 
-    std::string Board::read(unsigned int  row, unsigned int  column, Direction direction, unsigned int  length) {
+    std::string Board::read(u_int row, u_int column, Direction direction, u_int length) {
         //checks if the row or col is out of bounds (should be > 0)
         if (row < 0 || column < 0)
         {
@@ -89,67 +75,63 @@ namespace ariel {
 
             throw std::out_of_range ("out of range, cant read a word in this length");
         }
-        
-/*
+        //checks if the length the user has entered is negative or decimal 
+        if (length < 0 || int(length) != length)
+        {
+            throw std::invalid_argument( "message length need to be greater then zero" );
+        }
+
         std::string ans;
         if (direction == Direction::Vertical)
         {
             for (size_t i = 0; i < length; i++)
             {
-                ans = ans + this->vect.at(row+i).at(column);
+            	if(this->vect.at(row+i).at(column) == 0){
+            		ans += '_';
+            	}
+            	else {
+            		ans += this->vect.at(row+i).at(column);
+            	}
+
             }
             
         }
         else{ // direction == Direction::Horizontal
             for (size_t i = 0; i < length; i++)
             {
-                ans = ans + this->vect.at(row).at(column+i);
-            }
-        }
-        */
-        
-        return "";
-    }
-    void Board::show() {
-      
-
-        //more clever way to print
-        
-        for (unsigned int i = this->low_limit_row; i < this->high_limit_row; i++)
-        {
-            for (unsigned int  j = this->low_limit_col; j < this->high_limit_col; j++)
-            {
-                if (int(this->vect.at(i).at(j)) == 0)
-                {
-                    std::cout << '_';
-                }
-                else{
-                    std::cout << this->vect.at(i).at(j);
-                    
-                }
+            
+            if(this->vect.at(row).at(column+i) == 0){
+            		ans += '_';
+            	}
+            	else {
+			ans += this->vect.at(row).at(column+i);
+            	}
                 
             }
-            std::cout << "" << std::endl;
-            
         }
+        
+        return ans;
+    }
+    void Board::show() {
+        
+        
+            std::cout << "" << std::endl;
          
     }
 
-
-
-    void Board::fill_with_new_message_vert(unsigned int  row, unsigned int  col, std::string message){
-        unsigned int  j = 0;
-        for (unsigned int  i = row; i < row + message.size(); i++)
+    void Board::fill_with_new_message_vert(u_int row, u_int col, const std::string &message){
+        unsigned long j = 0;
+        for (size_t i = row; i < row + message.size(); i++)
         { 
             this->vect.at(i).at(col) = message[j++];
         }
 
     }
 
-    void Board::fill_with_new_message_horizon(unsigned int  row, unsigned int  col, std::string message){
+    void Board::fill_with_new_message_horizon(u_int row, u_int col, const std::string &message){
         
-        unsigned int  j = 0;
-        for (unsigned int  i = col; i < col + message.size(); i++)
+        unsigned long j = 0;
+        for (size_t i = col; i < col + message.size(); i++)
         {
             
             this->vect.at(row).at(i) = message[j++];
